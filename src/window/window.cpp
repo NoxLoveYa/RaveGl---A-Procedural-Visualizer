@@ -6,6 +6,7 @@
 */
 
 #include "window.hpp"
+#include "window_style.hpp"
 
 ImGuiIO *setupImGui()
 {
@@ -19,8 +20,9 @@ ImGuiIO *setupImGui()
     io.ConfigFlags |= ImGuiConfigFlags_NoMouseCursorChange;
 
     // Setup Dear ImGui style
-    ImGui::StyleColorsDark();
+    //ImGui::StyleColorsDark();
     // ImGui::StyleColorsLight();
+    StyleColorsCustom();
     return &io;
 }
 
