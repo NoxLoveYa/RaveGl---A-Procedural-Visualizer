@@ -17,6 +17,7 @@
 #include "../../lib/imgui/imgui_impl_opengl3.h"
 
 #include "../shaders/shaders.hpp"
+#include "../camera/camera.hpp"
 
 namespace visualizer
 {
@@ -35,7 +36,7 @@ namespace visualizer
         void SwapBuffers() { glfwSwapBuffers(window); }
         void PollEvents() { glfwPollEvents(); }
 
-        void ProcessInput();
+        void ProcessInput(GLFWwindow *window, MouseState &mouseState, Camera &camera);
         void update();
         // Callback
         static void framebuffer_size_callback(GLFWwindow *window, int width, int height)
@@ -43,10 +44,20 @@ namespace visualizer
             (void)window;
             glViewport(0, 0, width, height);
         }
+        //deltaTime
+        float CalculateDeltaTime() {
+            float currentFrame = static_cast<float>(glfwGetTime());
+            _deltaTime = currentFrame - _lastFrame;
+            _lastFrame = currentFrame;
+            return _deltaTime;
+        }
+        float GetDeltaTime() { return _deltaTime; }
 
     private:
         GLFWwindow *window;
         ImGuiIO *io;
         int width, height;
+        float _deltaTime = 0.0f;
+        float _lastFrame = 0.0f;
     };
 }
