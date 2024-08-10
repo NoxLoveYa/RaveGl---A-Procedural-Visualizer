@@ -59,6 +59,9 @@ The goal is to give anyone with a computer the ability to create a unique visual
 - [ ] Lights to the scene (e.g. spotlights, etc...)
 - [ ] Textures to the scene (e.g. skybox, etc...)
 
+VERY LATER:
+- [ ] AI powered scene modification (e.g. scene changes based on the mood of the music, it would propose different effects...)
+
 # Authors
 
 - [Alan] (https://github.com/ExtraBinoss)
