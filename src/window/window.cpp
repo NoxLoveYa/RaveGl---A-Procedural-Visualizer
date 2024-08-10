@@ -7,6 +7,21 @@
 
 #include "window.hpp"
 
+ImGuiIO *setupImGui()
+{
+    // Setup Dear ImGui context
+    IMGUI_CHECKVERSION();
+    ImGui::CreateContext();
+    ImGuiIO &io = ImGui::GetIO();
+    (void)io;
+    io.IniFilename = NULL;
+    io.LogFilename = NULL;
+
+    // Setup Dear ImGui style
+    ImGui::StyleColorsDark();
+    // ImGui::StyleColorsLight();
+    return &io;
+}
 
 namespace visualizer
 {
@@ -32,20 +47,11 @@ namespace visualizer
         // Set window to current context
         glfwMakeContextCurrent(window);
 
-        // Setup Dear ImGui context
-        IMGUI_CHECKVERSION();
-        ImGui::CreateContext();
-        io = &ImGui::GetIO(); (void)io;
-        io->IniFilename = NULL;
-        io->LogFilename = NULL;
-
-        // Setup Dear ImGui style
-        ImGui::StyleColorsDark();
-        //ImGui::StyleColorsLight();
+        // Initialize ImGui
+        io = setupImGui();
 
         // Setup Platform/Renderer backends
         ImGui_ImplGlfw_InitForOpenGL(window, true);
-
         ImGui_ImplOpenGL3_Init("#version 460");
 
         // Set framebuffer size callback
