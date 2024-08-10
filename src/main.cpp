@@ -9,7 +9,7 @@
 
 int main(void)
 {
-    visualizer::Window window(640, 480, "Hello World");
+    visualizer::Window window(640, 480, "RaveGl - A Procedural Visualizer");
 
     window.update();
 

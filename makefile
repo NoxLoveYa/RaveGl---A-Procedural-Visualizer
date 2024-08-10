@@ -5,6 +5,7 @@ CXX := g++
 CC := gcc
 
 # Compiler flags
+Include := lib/include/
 CXXFLAGS := -pthread -Wall -Wextra -pedantic -std=c++20
 CFLAGS := -Wall
 
@@ -27,7 +28,7 @@ all: $(TARGET)
 
 # Compile C++ source files into object files
 %.o: %.cpp
-	$(CXX) $(CXXFLAGS) -c $< -o $@
+	$(CXX) $(CXXFLAGS) -c $< -o $@ -I $(Include)
 
 # Compile C source files into object files
 %.o: %.c
