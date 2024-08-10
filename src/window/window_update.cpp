@@ -31,7 +31,8 @@ namespace visualizer
             // Show menu etc
             {
                 using namespace ImGui;
-                Begin("Menu");
+                ImGui::SetNextWindowPos(ImVec2(0, 0));
+                Begin("Menu", NULL, ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoCollapse);
                 Text("Hello, world! Application average: %.3f ms/frame (%.1f FPS)", 1000.0f / io->Framerate, io->Framerate);
                 End();
             }
