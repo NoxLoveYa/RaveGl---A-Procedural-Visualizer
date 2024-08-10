@@ -16,6 +16,7 @@ ImGuiIO *setupImGui()
     (void)io;
     io.IniFilename = NULL;
     io.LogFilename = NULL;
+    io.ConfigFlags |= ImGuiConfigFlags_NoMouseCursorChange;
 
     // Setup Dear ImGui style
     ImGui::StyleColorsDark();
