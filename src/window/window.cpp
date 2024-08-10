@@ -7,6 +7,7 @@
 
 #include "window.hpp"
 
+
 namespace visualizer
 {
     Window::Window(int width, int height, const char *title)
@@ -31,6 +32,22 @@ namespace visualizer
         // Set window to current context
         glfwMakeContextCurrent(window);
 
+        // Setup Dear ImGui context
+        IMGUI_CHECKVERSION();
+        ImGui::CreateContext();
+        ImGuiIO& io = ImGui::GetIO(); (void)io;
+        io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;     // Enable Keyboard Controls
+        io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;      // Enable Gamepad Controls
+
+        // Setup Dear ImGui style
+        ImGui::StyleColorsDark();
+        //ImGui::StyleColorsLight();
+
+        // Setup Platform/Renderer backends
+        ImGui_ImplGlfw_InitForOpenGL(window, true);
+
+        ImGui_ImplOpenGL3_Init("#version 460");
+
         // Set framebuffer size callback
         glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
 
@@ -47,6 +64,10 @@ namespace visualizer
 
     Window::~Window()
     {
+        ImGui_ImplOpenGL3_Shutdown();
+        ImGui_ImplGlfw_Shutdown();
+        ImGui::DestroyContext();
+        glfwDestroyWindow(window);
         glfwTerminate();
     }
 }

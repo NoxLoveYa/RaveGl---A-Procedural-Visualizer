@@ -11,7 +11,7 @@ CFLAGS := -Wall
 LIBS := -lGL -lglfw -lX11 -lXrandr -lpthread -lXi -ldl -lXinerama -lXcursor
 
 # Source files
-CXX_SRCS := $(wildcard src/*.cpp src/*/*.cpp)
+CXX_SRCS := $(wildcard lib/imgui/*.cpp  src/*.cpp src/*/*.cpp)
 C_SRCS := lib/glad/glad.c
 
 # Object files
