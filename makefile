@@ -5,7 +5,7 @@ CXX := g++
 CC := gcc
 
 # Compiler flags
-Include := lib/include/
+Include := include/
 CXXFLAGS := -pthread -Wall -Wextra -pedantic -std=c++20
 CFLAGS := -Wall
 
