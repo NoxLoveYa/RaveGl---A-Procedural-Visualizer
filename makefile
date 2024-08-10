@@ -6,7 +6,7 @@ CC := gcc
 
 # Compiler flags
 Include := include/
-CXXFLAGS := -pthread -Wall -Wextra -pedantic -std=c++20
+CXXFLAGS := -pthread -Wall -Wextra -pedantic -std=c++20 -g3
 CFLAGS := -Wall
 
 LIBS := -lGL -lglfw -lX11 -lXrandr -lpthread -lXi -ldl -lXinerama -lXcursor
