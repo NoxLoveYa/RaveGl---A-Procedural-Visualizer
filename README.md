@@ -47,11 +47,11 @@ The goal is to give anyone with a computer the ability to create a unique visual
 # Roadmap
 
 - [ ] Generate scene procedurally (based on audio input, etc...)
-- [ ] Add Physics to objects using Bullet Physics
-- [ ] Add Text to the scene (**e.g. Dj name)
+- [ ] Add Text to the scene (e.g. Dj name)
 - [ ] Make it seem like the camera is moving around the scene (e.g. camera shake, camera rotation, etc...)
 - [ ] Add more objects to the scene (e.g parsing ".obj" files, etc...)
 - [ ] Possibility to load custom obj files from a directory (samples will be provided)
+- [ ] Add Physics to objects using Bullet Physics
 - [ ] Complex shapes like fractals, torus to the scene
 - [ ] Effects to the scene (e.g. bloom, etc...)
 - [ ] Shaders to the scene (e.g. water shader, etc...)
@@ -60,7 +60,7 @@ The goal is to give anyone with a computer the ability to create a unique visual
 - [ ] Textures to the scene (e.g. skybox, etc...)
 
 VERY LATER:
-- [ ] AI powered scene modification (e.g. scene changes based on the mood of the music, it would propose different effects...)
+- [ ] AI powered scene modification using Stable Diffusion (e.g. scene changes based on the mood of the music, it would propose different effects...)
 
 # Authors
 
