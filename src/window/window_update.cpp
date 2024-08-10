@@ -29,9 +29,12 @@ namespace visualizer
             ImGui::NewFrame();
 
             // Show menu etc
-            ImGui::Begin("Menu");
-            ImGui::Text("Hello, world!");
-            ImGui::End();
+            {
+                using namespace ImGui;
+                Begin("Menu");
+                Text("Hello, world! Application average: %.3f ms/frame (%.1f FPS)", 1000.0f / io->Framerate, io->Framerate);
+                End();
+            }
 
             // Rendering
             ImGui::Render();

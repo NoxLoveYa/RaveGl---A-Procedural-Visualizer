@@ -42,6 +42,7 @@ namespace visualizer
 
     private:
         GLFWwindow *window;
+        ImGuiIO *io;
         int width, height;
     };
 }

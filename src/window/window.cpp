@@ -35,9 +35,9 @@ namespace visualizer
         // Setup Dear ImGui context
         IMGUI_CHECKVERSION();
         ImGui::CreateContext();
-        ImGuiIO& io = ImGui::GetIO(); (void)io;
-        io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;     // Enable Keyboard Controls
-        io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;      // Enable Gamepad Controls
+        io = &ImGui::GetIO(); (void)io;
+        io->IniFilename = NULL;
+        io->LogFilename = NULL;
 
         // Setup Dear ImGui style
         ImGui::StyleColorsDark();
