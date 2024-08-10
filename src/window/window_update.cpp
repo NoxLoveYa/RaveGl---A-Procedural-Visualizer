@@ -19,9 +19,9 @@ namespace visualizer
     {
         GLfloat vertices[] = {
             // Positions         // Colors
-            0.0f, 0.5f, 0.0f, 1.0f, 0.0f, 0.0f,   // Top
-            -0.5f, -0.5f, 0.0f, 0.0f, 1.0f, 0.0f, // Bottom Left
-            0.5f, -0.5f, 0.0f, 0.0f, 0.0f, 1.0f   // Bottom Right
+            0.0f, 0.5f, 0.0f, 1.0f, 0.0f, 0.0f, 1.0f,   // Top
+            -0.5f, -0.5f, 0.0f, 0.0f, 1.0f, 0.0f, 0.1f, // Bottom Left
+            0.5f, -0.5f, 0.0f, 0.0f, 0.0f, 1.0f, 0.1f   // Bottom Right
         };
 
         Shaders shaders;
@@ -40,10 +40,10 @@ namespace visualizer
         glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
 
         // Position attribute
-        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void *)0);
+        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 7 * sizeof(float), (void *)0);
         glEnableVertexAttribArray(0);
         // Color attribute
-        glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void *)(3 * sizeof(float)));
+        glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, 7 * sizeof(float), (void *)(3 * sizeof(float)));
         glEnableVertexAttribArray(1);
 
         glBindBuffer(GL_ARRAY_BUFFER, 0);

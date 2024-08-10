@@ -40,6 +40,7 @@ namespace visualizer
         glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 6);
         // Set OpenGL profile to core
         glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+        glfwWindowHint(GLFW_ALPHA_BITS, 8);  // For GLFW transparent window
         // Create window
         window = glfwCreateWindow(width, height, title, NULL, NULL);
         if (!window)
@@ -66,6 +67,10 @@ namespace visualizer
             glfwTerminate();
             exit(84);
         }
+
+        // Enable blending
+        glEnable(GL_BLEND);
+        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
         // Set viewport
         glViewport(0, 0, width, height);
