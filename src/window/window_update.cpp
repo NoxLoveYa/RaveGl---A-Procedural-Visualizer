@@ -7,6 +7,8 @@
 
 #include "window.hpp"
 #include "../src/primitives/cube.hpp"
+#include "../src/primitives/primitive_generator.hpp"
+#include "../src/primitives/random_primitive.hpp"
 
 namespace visualizer
 {
@@ -34,13 +36,18 @@ namespace visualizer
     {
         Camera camera(glm::vec3(0.0f, 0.0f, 3.0f));
         MouseState mouseState;
-
+        int numVertices = 128;
+        int numPositions = 10;
+        PrimitiveGenerator theShapes("", numVertices, numPositions, "src/primitives/random_primitive.hpp");
+        std::vector<float> vertices = theShapes.getVertices();
+        std::vector<glm::vec3> randomPositions = theShapes.getPositions();
         //cube coordinates are in /src/primitives/cube.hpp (TEMPORARY)
 
         Shaders shaders;
         GLuint vertexShader = shaders.compileShaderFromFile("src/shaders/glsl/vertex_shader.glsl", GL_VERTEX_SHADER);
         GLuint fragmentShader = shaders.compileShaderFromFile("src/shaders/glsl/fragment_shader.glsl", GL_FRAGMENT_SHADER);
         shaders.createProgram(vertexShader, fragmentShader, "cube");
+        shaders.createProgram(vertexShader, fragmentShader, theShapes.getPrimitiveName().c_str());
 
         // Set up vertex data and buffers and configure vertex attributes
         GLuint VBO, VAO;
@@ -61,6 +68,27 @@ namespace visualizer
 
         glBindBuffer(GL_ARRAY_BUFFER, 0);
         glBindVertexArray(0);
+
+
+        // Set up vertex data and buffers and configure vertex attributes for random primitive
+    GLuint randomVBO, randomVAO;
+    glGenVertexArrays(1, &randomVAO);
+    glGenBuffers(1, &randomVBO);
+
+    glBindVertexArray(randomVAO);
+
+    glBindBuffer(GL_ARRAY_BUFFER, randomVBO);
+    glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(float), vertices.data(), GL_STATIC_DRAW);
+
+    // Position attribute
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)0);
+    glEnableVertexAttribArray(0);
+    // Texture coord attribute
+    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float)));
+    glEnableVertexAttribArray(1);
+
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
+    glBindVertexArray(0);
 
         while (!ShouldClose())
         {
@@ -107,6 +135,25 @@ namespace visualizer
 
                 glDrawArrays(GL_TRIANGLES, 0, 36);
             }
+        shaders.useProgram(theShapes.getPrimitiveName().c_str());
+
+        // Set up view and projection matrices
+        shaders.setMat4("projection", projection);
+        shaders.setMat4("view", view);
+
+        // Render random primitives
+        glBindVertexArray(randomVAO);
+        for (unsigned int i = 0; i < randomPositions.size(); i++) {
+            // Calculate the model matrix for each object and pass it to shader before drawing
+            glm::mat4 model = glm::mat4(1.0f);
+            model = glm::translate(model, randomPositions[i]);
+            float angle = glfwGetTime() * 50.0f; // Adjust the speed as needed
+            model = glm::rotate(model, glm::radians(angle), glm::vec3(1.0f, 0.3f, 0.5f));
+            shaders.setMat4("model", model);
+
+            glDrawArrays(GL_TRIANGLES, 0, numVertices);
+        }
+
 
             // Rendering ImGui
             ImGui::Render();

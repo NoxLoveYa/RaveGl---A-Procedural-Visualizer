@@ -85,6 +85,27 @@ GLuint Shaders::getProgramID(const char *id) const
     return 0;
 }
 
+//shader management
+
+void Shaders::attachShader(const char *id, GLuint shader)
+{
+    glAttachShader(programs[id], shader);
+}
+
+void Shaders::linkProgram(const char *id)
+{
+    glLinkProgram(programs[id]);
+    GLint success;
+    GLchar infoLog[512];
+    glGetProgramiv(programs[id], GL_LINK_STATUS, &success);
+    if (!success)
+    {
+        glGetProgramInfoLog(programs[id], 512, NULL, infoLog);
+        std::cerr << "ERROR::SHADER::PROGRAM::LINKING_FAILED\n"
+                  << infoLog << std::endl;
+    }
+}
+
 //setters
 
 void Shaders::setBool(const char *name, bool value) const

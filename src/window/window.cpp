@@ -75,6 +75,9 @@ namespace visualizer
 
         // Set viewport
         glViewport(0, 0, width, height);
+
+        //set random seed
+        srand(static_cast<unsigned int>(time(0)));
     }
 
     Window::~Window()

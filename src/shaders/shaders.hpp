@@ -27,6 +27,11 @@ public:
     bool createProgram(GLuint vertexShader, GLuint fragmentShader, const char *id);
     void useProgram(const char *id);
     GLuint getProgramID(const char *id) const;
+    //shader management
+    void attachShader(const char *id, GLuint shader);
+    void linkProgram(const char *id);
+    
+    //uniform management
     void setBool(const char *name, bool value) const;
     void setInt(const char *name, int value) const;
     void setFloat(const char *name, float value) const;
