@@ -49,46 +49,10 @@ namespace visualizer
         shaders.createProgram(vertexShader, fragmentShader, "cube");
         shaders.createProgram(vertexShader, fragmentShader, theShapes.getPrimitiveName().c_str());
 
-        // Set up vertex data and buffers and configure vertex attributes
-        GLuint VBO, VAO;
-        glGenVertexArrays(1, &VAO);
-        glGenBuffers(1, &VBO);
-
-        glBindVertexArray(VAO);
-
-        glBindBuffer(GL_ARRAY_BUFFER, VBO);
-        glBufferData(GL_ARRAY_BUFFER, sizeof(cube_vertices), cube_vertices, GL_STATIC_DRAW);
-
-        // Position attribute
-        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)0);
-        glEnableVertexAttribArray(0);
-        // texture coord attribute
-        glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float)));
-        glEnableVertexAttribArray(1);
-
-        glBindBuffer(GL_ARRAY_BUFFER, 0);
-        glBindVertexArray(0);
-
-
-        // Set up vertex data and buffers and configure vertex attributes for random primitive
-    GLuint randomVBO, randomVAO;
-    glGenVertexArrays(1, &randomVAO);
-    glGenBuffers(1, &randomVBO);
-
-    glBindVertexArray(randomVAO);
-
-    glBindBuffer(GL_ARRAY_BUFFER, randomVBO);
-    glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(float), vertices.data(), GL_STATIC_DRAW);
-
-    // Position attribute
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)0);
-    glEnableVertexAttribArray(0);
-    // Texture coord attribute
-    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float)));
-    glEnableVertexAttribArray(1);
-
-    glBindBuffer(GL_ARRAY_BUFFER, 0);
-    glBindVertexArray(0);
+        VertexArray cubeVAO(cube_vertices, sizeof(cube_vertices));
+        cubeVAO.bindAndUnbind();
+        VertexArray randomVAO(vertices.data(), vertices.size());
+        randomVAO.bindAndUnbind();
 
         while (!ShouldClose())
         {
@@ -124,7 +88,8 @@ namespace visualizer
             shaders.setMat4("view", view);
 
             // render container
-            glBindVertexArray(VAO);
+            //glBindVertexArray(VAO);
+            cubeVAO.bind();
             for (unsigned int i = 0; i < 10; i++) {
                 // calculate the model matrix for each object and pass it to shader before drawing
                 glm::mat4 model = glm::mat4(1.0f);
@@ -142,7 +107,8 @@ namespace visualizer
         shaders.setMat4("view", view);
 
         // Render random primitives
-        glBindVertexArray(randomVAO);
+        //glBindVertexArray(randomVAO);
+        randomVAO.bind();
         for (unsigned int i = 0; i < randomPositions.size(); i++) {
             // Calculate the model matrix for each object and pass it to shader before drawing
             glm::mat4 model = glm::mat4(1.0f);
@@ -161,7 +127,7 @@ namespace visualizer
 
             SwapBuffers();
         }
-        glDeleteVertexArrays(1, &VAO);
-        glDeleteBuffers(1, &VBO);
+        cubeVAO.deleteBuffers();
+        randomVAO.deleteBuffers();
     }
 }

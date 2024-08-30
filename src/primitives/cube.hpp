@@ -5,6 +5,7 @@
 ** cube.hpp
 */
 
+#pragma once
 //cube cube_vertices (36)
 #include <glm/glm.hpp>
 

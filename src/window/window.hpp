@@ -7,8 +7,6 @@
 
 #pragma once
 
-#include <glad/glad.h>
-#include <GLFW/glfw3.h>
 #include <cstdlib>
 #include <iostream>
 
@@ -18,6 +16,7 @@
 
 #include "../shaders/shaders.hpp"
 #include "../camera/camera.hpp"
+#include "../render/VertexArray.hpp"
 
 namespace visualizer
 {

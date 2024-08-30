@@ -92,8 +92,12 @@ void PrimitiveGenerator::appendVerticesToFile(const std::vector<float>& vertices
         return;
     }
 
+    file << "#pragma once" << std::endl;
     file << "#include <glm/glm.hpp>" << std::endl;
+    file << std::endl;
     file << "float " << _primitive_name << "_vertices[] = {" << std::endl;
+    file << "    // x, y, z, u, v" << std::endl;
+    file << "    // Positions        // Texture Coords " << std::endl;
     for (size_t i = 0; i < vertices.size(); i += 5) {
         file << "    " << vertices[i] << "f, " << vertices[i + 1] << "f, " << vertices[i + 2] << "f,  " << vertices[i + 3] << "f, " << vertices[i + 4] << "f," << std::endl;
     }
@@ -111,7 +115,9 @@ void PrimitiveGenerator::appendPositionsToFile(const std::vector<glm::vec3>& pos
         std::cerr << "Failed to open file: " << filename << std::endl;
         return;
     }
+    file << std::endl;
     file << "glm::vec3 " << _primitive_name << "_positions[] = {" << std::endl;
+    file << "    // x, y, z" << std::endl;
     for (const auto& pos : positions) {
         file << "    glm::vec3(" << pos.x << "f, " << pos.y << "f, " << pos.z << "f)," << std::endl;
     }

@@ -5,6 +5,8 @@
 ** primitive_generator.cpp
 */
 
+#pragma once
+
 #include <iostream>
 #include <vector>
 #include <cstdlib>
