@@ -77,64 +77,23 @@ namespace visualizer
         std::vector<glm::vec3> randomPositions = theShapes.getPositions();
         //cube coordinates are in /src/primitives/cube.hpp (TEMPORARY)
 
-        Shaders shaders;
-        GLuint vertexShader = shaders.compileShaderFromFile("src/shaders/glsl/vertex_shader.glsl", GL_VERTEX_SHADER);
-        GLuint fragmentShader = shaders.compileShaderFromFile("src/shaders/glsl/fragment_shader.glsl", GL_FRAGMENT_SHADER);
-        shaders.createProgram(vertexShader, fragmentShader, "cube");
-        // shaders.createProgram(vertexShader, fragmentShader, theShapes.getPrimitiveName().c_str());
+        std::shared_ptr<Shaders> shaders = std::make_shared<Shaders>();
+        GLuint vertexShader = shaders->compileShaderFromFile("src/shaders/glsl/vertex_shader.glsl", GL_VERTEX_SHADER);
+        GLuint fragmentShader = shaders->compileShaderFromFile("src/shaders/glsl/fragment_shader.glsl", GL_FRAGMENT_SHADER);
+        //shaders->createProgram(vertexShader, fragmentShader, "cube");
+        //shaders.createProgram(vertexShader, fragmentShader, theShapes.getPrimitiveName().c_str());
 
-        //pre process all .obj files and save them in a file readable afterwards
-        //Model model;
-        //for each model, model.loadObj("src/primitives/obj/complex_torus.obj");
-        //model.processData(get_all_vertices, get_all_normals, get_all_uvs);
-        //model.saveData("src/primitives/obj/complex_torus.obj");
-        //Model loadedComplexTorus;
-        //loadedComplexTorus.parseModel("src/primitives/obj/complex_torus.obj");
-        //loadedComplexTorus.loadProcessedData("src/primitives/obj/complex_torus.bin");
-        //loadedComplexTorus.parseModel("src/primitives/obj/complex_torus.obj");
-        //loadedComplexTorus.saveProcessedData("src/primitives/obj/complex_torus.bin");
-        //loadedComplexTorus.loadProcessedData("src/primitives/obj/complex_torus.bin");
-        //std::cout << "loadedComplexTorus " << loadedComplexTorus.getNumFaces() << std::endl;
-
-        // Model loadedCreepyGirl;
-        // loadedCreepyGirl.parseModel("src/primitives/obj/Vanellope.obj");
-        // loadedCreepyGirl.saveProcessedData("src/primitives/obj/Vanellope.bin");
-        // loadedCreepyGirl.loadProcessedData("src/primitives/obj/Vanellope.bin");
-
-        //load whenever needed
         // spawn at will
 
-        GLuint torusVertexShader = shaders.compileShaderFromFile("src/shaders/glsl/torus_vertex_shader.glsl", GL_VERTEX_SHADER);
-        GLuint torusFragmentShader = shaders.compileShaderFromFile("src/shaders/glsl/torus_fragment_shader.glsl", GL_FRAGMENT_SHADER);
-        //shaders.createProgram(torusVertexShader, torusFragmentShader, "complex_torus");
-        shaders.createProgram(vertexShader, fragmentShader, "complex_torus");
-        //shaders.createProgram(vertexShader, fragmentShader, "Vanellope");
-
-        // VertexArray cubeVAO(cube_vertices, sizeof(cube_vertices));
-        // cubeVAO.bindAndUnbind();
-        // VertexArray randomVAO(vertices.data(), vertices.size());
-        // randomVAO.bindAndUnbind();
+        GLuint torusVertexShader = shaders->compileShaderFromFile("src/shaders/glsl/torus_vertex_shader.glsl", GL_VERTEX_SHADER);
+        GLuint torusFragmentShader = shaders->compileShaderFromFile("src/shaders/glsl/torus_fragment_shader.glsl", GL_FRAGMENT_SHADER);
+        shaders->createProgram(vertexShader, fragmentShader, "generic_complex_obj");
 
         std::unordered_map<std::string, std::shared_ptr<Model>> models = processAllModels("src/primitives/obj");
-        std::cout << "faceszgerhreherhree" <<  models["complex_torus"]->getNumFaces() << std::endl;
-
-        // Debug: Verify that the model is correctly retrieved from the map
-        if (models.find("complex_torus") != models.end()) {
-            std::cout << "Model 'complex_torus' found in map" << std::endl;
-            std::cout << "Number of vertices: " << models["complex_torus"]->getNumVertices() << std::endl;
-            std::cout << "Number of faces: " << models["complex_torus"]->getNumFaces() << std::endl;
-            std::cout << "IndexData size: " << models["complex_torus"]->getIndexData().size() << std::endl;
-        } else {
-            std::cerr << "Model 'complex_torus' not found in map" << std::endl;
-        }
-        //Model loadedComplexTorus;
-        //loadedComplexTorus.loadProcessedData("src/primitives/obj/complex_torus.bin");
-        // loadedComplexTorus.getVao().initializeObj(loadedComplexTorus.getVertexData(), loadedComplexTorus.getTexCoordData(), loadedComplexTorus.getNormalData(), loadedComplexTorus.getIndexData());
-        // std::cout << "loadedComplexTorus " << loadedComplexTorus.getNumVertices() << std::endl;
-        // std::cout << "loadedComplexTorus faces" << loadedComplexTorus.getNumFaces() << std::endl;
         // for (auto& [modelName, model] : models) {
+        //     shaders->createProgram(vertexShader, fragmentShader, modelName.c_str());
         //     std::cout << "Using model: " << modelName << std::endl;
-        //     std::cout << "gimme that !" << model.getNumVertices() << std::endl;
+        //     std::cout << "gimme that !" << model->getNumVertices() << std::endl;
         // }
 
 
@@ -152,8 +111,8 @@ namespace visualizer
             // Poll and handle events (inputs, window resize, etc.)
             PollEvents();
             ProcessInput(window, mouseState, camera);
-            glm::mat4 projection = glm::perspective(glm::radians(45.0f), (float)width / (float)height, 0.1f, 100.0f);
-        glm::mat4 view = camera.GetViewMatrix();
+            // glm::mat4 projection = glm::perspective(glm::radians(45.0f), (float)width / (float)height, 0.1f, 100.0f);
+            // glm::mat4 view = camera.GetViewMatrix();
             // Start the Dear ImGui frame
             ImGui_ImplOpenGL3_NewFrame();
             ImGui_ImplGlfw_NewFrame();
@@ -170,135 +129,46 @@ namespace visualizer
 
             glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-            // shaders.useProgram("complex_torus");
 
-            // shaders.setMat4("projection", projection);
-            // shaders.setMat4("view", view);
-            // glm::mat4 model = glm::mat4(1.0f);
-            // model = glm::translate(model, glm::vec3(0.0f, 0.0f, -5.0f));
-            // shaders.setMat4("model", model);
-            // shaders.setVec3("lightPos", lightPos);
-            // shaders.setVec3("viewPos", camera.Position);
-            // shaders.setVec3("lightColor", lightColor);
-            // shaders.setVec3("objectColor", objectColor);
-            // models["complex_torus"].draw();
+            shaders->useProgram("generic_complex_obj");
+            for (auto& [modelName, model] : models) {
+                //Apply transformations and other operations to the model
+                glm::mat4 projection = glm::perspective(glm::radians(45.0f), (float)width / (float)height, 0.1f, 100.0f);
+                glm::mat4 view = camera.GetViewMatrix();
+                // Light and material properties
+                glm::vec3 lightPos(1.2f, 1.0f, 5.0f);
+                glm::vec3 lightColor(1.0f, 1.0f, 1.0f);
 
-            // for (auto& [modelName, model] : models) {
-            //     //shaders.useProgram(modelName.c_str());
-            //     //std::cout << "Drawing model: [" << modelName << "]" << std::endl;
-            //     // Apply transformations and other operations to the model
-            //     glm::mat4 projection = glm::perspective(glm::radians(45.0f), (float)width / (float)height, 0.1f, 100.0f);
-            //     glm::mat4 view = camera.GetViewMatrix();
+                // Example of applying transformations to the model
+                glm::mat4 modelMatrix = glm::mat4(1.0f);
+                modelMatrix = glm::translate(modelMatrix, glm::vec3(0.0f, 0.0f, -5.0f));
+                //continous rotation
+                float angle = glfwGetTime() * 50.0f; // Adjust the speed as needed
+                modelMatrix = glm::rotate(modelMatrix, glm::radians(angle), glm::vec3(1.0f, 0.3f, 0.5f));
 
-            //     // Light and material properties
-            //     glm::vec3 lightPos(1.2f, 1.0f, 5.0f);
-            //     glm::vec3 lightColor(1.0f, 1.0f, 1.0f);
+                // Set the shader uniforms
+                shaders->setMat4("model", modelMatrix);
+                shaders->setMat4("view", view);
+                shaders->setMat4("projection", projection);
+                shaders->setVec3("lightPos", lightPos);
+                shaders->setVec3("viewPos", camera.Position);
+                shaders->setVec3("lightColor", lightColor);
+                shaders->setVec3("objectColor", objectColor);
 
-            //     // Example of applying transformations to the model
-            //     glm::mat4 modelMatrix = glm::mat4(1.0f);
-            //     modelMatrix = glm::translate(modelMatrix, glm::vec3(0.0f, 0.0f, -5.0f));
-            //     modelMatrix = glm::rotate(modelMatrix, glm::radians(45.0f), glm::vec3(0.0f, 1.0f, 0.0f));
-
-            //     // Set the shader uniforms
-            //     shaders.setMat4("model", modelMatrix);
-            //     shaders.setMat4("view", view);
-            //     shaders.setMat4("projection", projection);
-            //     shaders.setVec3("lightPos", lightPos);
-            //     shaders.setVec3("viewPos", camera.Position);
-            //     shaders.setVec3("lightColor", lightColor);
-            //     shaders.setVec3("objectColor", objectColor);
-
-            //     // Use the model matrix for rendering
-            //     model.setModelMatrix(modelMatrix);
-            //     model.draw();
-            // }
-
-            // render primitives (Cubes in this case)
-            //shaders.useProgram("cube");
-
-            // set up view and projection matrices
-            // glm::mat4 projection = glm::perspective(glm::radians(camera.Zoom), (float)width / (float)height, 0.1f, 100.0f);
-            // shaders.setMat4("projection", projection);
-            // // camera/view transformation
-            // glm::mat4 view = camera.GetViewMatrix();
-            // shaders.setMat4("view", view);
-
-            // // render container
-            //cubeVAO.bind();
-            // glm::vec3 modelPosition = glm::vec3(0.0f, 0.0f, 0.0f);
-            // glm::mat4 model = glm::mat4(1.0f);
-            // model = glm::translate(model, modelPosition);
-            // shaders.setMat4("model", model);
-            // glDrawArrays(GL_TRIANGLES, 0, 36);
-            // for (unsigned int i = 0; i < 10; i++) {
-            //     // calculate the model matrix for each object and pass it to shader before drawing
-            //     glm::mat4 model = glm::mat4(1.0f);
-            //     model = glm::translate(model, cubePositions[i]);
-            //     float angle = glfwGetTime() * 50.0f; // Adjust the speed as needed
-            //     model = glm::rotate(model, glm::radians(angle), glm::vec3(1.0f, 0.3f, 0.5f));
-            //     shaders.setMat4("model", model);
-
-            //     glDrawArrays(GL_TRIANGLES, 0, 36);
-            // }
-        // shaders.useProgram(theShapes.getPrimitiveName().c_str());
-
-        // // Set up view and projection matrices
-        // shaders.setMat4("projection", projection);
-        // shaders.setMat4("view", view);
-
-        // // Render random primitives
-        // randomVAO.bind();
-        // for (unsigned int i = 0; i < randomPositions.size(); i++) {
-        //     // Calculate the model matrix for each object and pass it to shader before drawing
-        //     glm::mat4 model = glm::mat4(1.0f);
-        //     model = glm::translate(model, randomPositions[i]);
-        //     float angle = glfwGetTime() * 50.0f; // Adjust the speed as needed
-        //     model = glm::rotate(model, glm::radians(angle), glm::vec3(1.0f, 0.3f, 0.5f));
-        //     shaders.setMat4("model", model);
-
-        //     glDrawArrays(GL_TRIANGLES, 0, numVertices);
-        // }
-
-        // Draw the complex torus model
-        if (models.find("complex_torus") == models.end()) {
-            std::cerr << "Model complex_torus not found in models map." << std::endl;
-            return;
-        }
-            shaders.useProgram("complex_torus");
-            shaders.setMat4("projection", projection);
-            shaders.setMat4("view", view);
-
-            //Adjust model position (e.g., move it 5 units in front of the camera)
-            // Adjust model position (e.g., move it 5 units in front of the camera)
-            glm::mat4 model = glm::mat4(1.0f);
-            model = glm::translate(model, glm::vec3(0.0f, 0.0f, -5.0f)); // Move the model 5 units in front of the camera
-            shaders.setMat4("model", model);
-            shaders.setVec3("lightPos", lightPos);
-            shaders.setVec3("viewPos", camera.Position);
-            shaders.setVec3("lightColor", lightColor);
-            shaders.setVec3("objectColor", objectColor);
-            //complexTorus.draw();
-            //loadedComplexTorus.draw();
-            //loadedCreepyGirl.draw();
-            // Model testTorus;
-            // testTorus.loadProcessedData("src/primitives/obj/complex_torus.bin");
-            // // std::cout << "testtorus " << testTorus.getNumVertices() << std::endl;
-            // std::cout << "testtorus indexdata " << testTorus.getIndexData().size() << std::endl;
-            // testTorus.draw();
-
-            //drawModel(models, "complex_torus");
-            models["complex_torus"]->draw();
-            GLenum err;
-            while ((err = glGetError()) != GL_NO_ERROR) {
-                std::cerr << "OpenGL error: " << err << std::endl;
+                // Use the model matrix for rendering
+                model->setModelMatrix(modelMatrix);
+                model->draw();
             }
+
             // Rendering ImGui
             ImGui::Render();
             ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 
             SwapBuffers();
+            GLenum err;
+            while ((err = glGetError()) != GL_NO_ERROR) {
+                std::cerr << "OpenGL error: " << err << std::endl;
+            }
         }
-        // cubeVAO.deleteBuffers();
-        // randomVAO.deleteBuffers();
     }
 }
