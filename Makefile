@@ -45,6 +45,7 @@ clean:
 
 fclean: clean
 	rm -f $(TARGET)
+	rm -f src/primitives/obj/*.bin
 
 re: fclean all
 

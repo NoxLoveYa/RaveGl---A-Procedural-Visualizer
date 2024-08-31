@@ -6,6 +6,7 @@
 */
 
 #include "Model.hpp"
+#include "ObjLoader.hpp"
 
 Model::Model()
 {
@@ -18,13 +19,14 @@ Model::Model(const std::string& filePath)
     std::vector<Normal> normals;
     std::vector<Face> faces;
 
-    if (loadOBJ(filePath, vertices, texCoords, normals, faces)) {
+    ObjLoader loader;
+    if (loader.loadOBJ(filePath, vertices, texCoords, normals, faces)) {
         std::cout << "Vertices: " << vertices.size()
         << " | Texture Coordinates: " << texCoords.size()
         << " | Normals: " << normals.size()
         << " | Faces: " << faces.size() << std::endl;
         std::cout << "Processing data..." << std::endl;
-        processData(vertices, texCoords, normals, faces);
+        //processData(vertices, texCoords, normals, faces);
         _vao.initializeObj(_vertexData, _texCoordData, _normalData, _indexData);
         _numFaces = faces.size();
     } else {
@@ -34,6 +36,8 @@ Model::Model(const std::string& filePath)
 
 Model::~Model()
 {
+    clearData();
+    _vao.deleteBuffers();
 }
 
 void Model::bind()
@@ -53,39 +57,14 @@ void Model::draw()
     unbind();
 }
 
-bool Model::loadOBJ(const std::string& path, std::vector<Vertex>& vertices, std::vector<TexCoord>& texCoords, std::vector<Normal>& normals, std::vector<Face>& faces) {
-    std::ifstream file(path);
-    if (!file.is_open()) {
-        std::cerr << "Failed to open file: " << path << std::endl;
-        return false;
-    }
-
-    std::string line;
-    while (std::getline(file, line)) {
-        std::istringstream iss(line);
-        std::string prefix;
-        iss >> prefix;
-
-        if (prefix == "v")
-            parseVertex(iss, vertices);
-        else if (prefix == "vt")
-            parseTexCoord(iss, texCoords);
-        else if (prefix == "vn")
-            parseNormal(iss, normals);
-        //f can have 3 or more index specifiers If there are more than 3, the triangles are the first and each pair of adjacent others
-        else if (prefix == "f")
-            parseFaces(iss, faces);
-    }
-    std::cout << "Loaded OBJ file: " << path << std::endl;
-    return true;
-}
-
 std::tuple<int, int, int> Model::generateKey(int vertexIndex, int texCoordIndex, int normalIndex)
 {
     return std::make_tuple(vertexIndex, texCoordIndex, normalIndex);
 }
 
-int Model::addUniqueVertex(const Vertex& vertex, const TexCoord& texCoord, const Normal& normal) {
+
+int Model::addUniqueVertex(const Vertex& vertex, const TexCoord& texCoord, const Normal& normal)
+{
     int index = _vertexData.size() / 3;
 
     _vertexData.push_back(vertex.x);
@@ -102,7 +81,8 @@ int Model::addUniqueVertex(const Vertex& vertex, const TexCoord& texCoord, const
     return index;
 }
 
-void Model::processData(const std::vector<Vertex>& vertices, const std::vector<TexCoord>& texCoords, const std::vector<Normal>& normals, const std::vector<Face>& faces) {
+void Model::processData(const std::vector<Vertex>& vertices, const std::vector<TexCoord>& texCoords, const std::vector<Normal>& normals, const std::vector<Face>& faces, const std::string &binPath)
+{
     std::unordered_map<std::tuple<int, int, int>, int, TupleHash> uniqueVertexMap;
 
     for (const auto& face : faces) {
@@ -117,81 +97,27 @@ void Model::processData(const std::vector<Vertex>& vertices, const std::vector<T
                 const Vertex& vertex = vertices[vertexIndex];
                 const TexCoord& texCoord = texCoords[texCoordIndex];
                 const Normal& normal = normals[normalIndex];
-
                 int newIndex = addUniqueVertex(vertex, texCoord, normal);
                 uniqueVertexMap[key] = newIndex;
             }
 
             _indexData.push_back(uniqueVertexMap[key]);
         }
-    }
+    }    
+
     std::cout
     << " Vertices: " << _vertexData.size() / 3
     << " | texCoords: " << _texCoordData.size() / 2
     << " | normals: " << _normalData.size() / 3 << std::endl;
+    std::cout << "Vertices: " << _vertexData.size() / 3 << " | Indices: " << _indexData.size() << std::endl;
+    saveProcessedData(binPath);
+    clearData(); // Clear the data after processing
+    uniqueVertexMap.clear();
+    uniqueVertexMap = std::unordered_map<std::tuple<int, int, int>, int, TupleHash>();
+
     std::cout << "Processed data" << std::endl;
 }
 
-void Model::parseVertex(std::istringstream& iss, std::vector<Vertex>& vertices)
-{
-    Vertex vertex;
-    iss >> vertex.x >> vertex.y >> vertex.z;
-    vertices.push_back(vertex);
-}
-
-void Model::parseTexCoord(std::istringstream& iss, std::vector<TexCoord>& texCoords)
-{
-    TexCoord texCoord;
-    iss >> texCoord.u >> texCoord.v;
-    texCoords.push_back(texCoord);
-}
-
-void Model::parseNormal(std::istringstream& iss, std::vector<Normal>& normals)
-{
-    Normal normal;
-    iss >> normal.nx >> normal.ny >> normal.nz;
-    normals.push_back(normal);
-}
-
-void Model::parseFaces(std::istringstream& iss, std::vector<Face>& faces)
-{
-    std::vector<int> vertexIndices;
-    std::vector<int> texCoordIndices;
-    std::vector<int> normalIndices;
-
-    std::string vertex;
-    while (iss >> vertex) {
-        std::replace(vertex.begin(), vertex.end(), '/', ' ');
-        std::istringstream vertexStream(vertex);
-        int vertexIndex, texCoordIndex, normalIndex;
-        vertexStream >> vertexIndex >> texCoordIndex >> normalIndex;
-
-        // OBJ indices are 1-based, so we need to subtract 1
-        vertexIndices.push_back(vertexIndex - 1);
-        texCoordIndices.push_back(texCoordIndex - 1);
-        normalIndices.push_back(normalIndex - 1);
-    }
-
-    // Triangulate the face : goes up to the second-to-last vertex (index vertexIndices.size() - 2).
-        for (size_t i = 0; i < vertexIndices.size() - 2; ++i) {
-        Face face;
-        face.vertexIndices.push_back(vertexIndices[0]);
-        face.vertexIndices.push_back(vertexIndices[i + 1]);
-        face.vertexIndices.push_back(vertexIndices[i + 2]);
-
-        face.texCoordIndices.push_back(texCoordIndices[0]);
-        face.texCoordIndices.push_back(texCoordIndices[i + 1]);
-        face.texCoordIndices.push_back(texCoordIndices[i + 2]);
-
-        face.normalIndices.push_back(normalIndices[0]);
-        face.normalIndices.push_back(normalIndices[i + 1]);
-        face.normalIndices.push_back(normalIndices[i + 2]);
-
-        faces.push_back(face);
-    }
-}
-
-// Pre-process the data and save it to a binary file
 
 void Model::saveProcessedData(const std::string& filename) {
     std::ofstream outFile(filename, std::ios::binary);
@@ -205,7 +131,6 @@ void Model::saveProcessedData(const std::string& filename) {
     size_t normalDataSize = _normalData.size();
     size_t indexDataSize = _indexData.size();
     size_t numFaces = _numFaces;
-    std::cout << " numfaces: " << numFaces << std::endl;
 
     // Write sizes
     outFile.write(reinterpret_cast<const char*>(&vertexDataSize), sizeof(vertexDataSize));
@@ -220,8 +145,10 @@ void Model::saveProcessedData(const std::string& filename) {
     outFile.write(reinterpret_cast<const char*>(_normalData.data()), normalDataSize * sizeof(float));
     outFile.write(reinterpret_cast<const char*>(_indexData.data()), indexDataSize * sizeof(unsigned int));
 
+    clearData(); // Clear the data after saving
     std::cout << "Model data saved successfully to " << filename << std::endl;
     outFile.close();
+
 }
 
 bool Model::loadProcessedData(const std::string& filename) {
@@ -230,6 +157,8 @@ bool Model::loadProcessedData(const std::string& filename) {
         std::cerr << "Error opening file for reading: " << filename << std::endl;
         return false;
     }
+
+    clearData(); // Clear the data before loading
 
     size_t vertexDataSize;
     size_t texCoordDataSize;
@@ -265,6 +194,7 @@ bool Model::loadProcessedData(const std::string& filename) {
     return true;
 }
 
+//finds the model, load it, process it and save it to a binary file
 void Model::parseModel(const std::string& filePath)
 {
     std::vector<Vertex> vertices;
@@ -272,16 +202,72 @@ void Model::parseModel(const std::string& filePath)
     std::vector<Normal> normals;
     std::vector<Face> faces;
 
-    if (loadOBJ(filePath, vertices, texCoords, normals, faces)) {
+    ObjLoader loader;
+    if (loader.loadOBJ(filePath, vertices, texCoords, normals, faces)) {
         std::cout << "Vertices: " << vertices.size()
         << " | Texture Coordinates: " << texCoords.size()
         << " | Normals: " << normals.size()
         << " | Faces: " << faces.size() << std::endl;
         std::cout << "Processing data..." << std::endl;
-        processData(vertices, texCoords, normals, faces);
-        _vao.initializeObj(_vertexData, _texCoordData, _normalData, _indexData);
+        std::filesystem::path binPath = filePath;
+        binPath.replace_extension(".bin");
+        processData(vertices, texCoords, normals, faces, binPath);
         _numFaces = faces.size();
-    } else {
-        std::cerr << "Failed to load OBJ file: " << filePath << std::endl;
+
+        GLenum err;
+        while ((err = glGetError()) != GL_NO_ERROR) {
+            std::cerr << "OpenGL error after VAO initialization: " << err << std::endl;
+        }
+        // // Clear the vectors to free memory
+        vertices.clear();
+        vertices.shrink_to_fit();
+        texCoords.clear();
+        texCoords.shrink_to_fit();
+        normals.clear();
+        normals.shrink_to_fit();
+        faces.clear();
+        faces.shrink_to_fit();
+
+        // // Clear data to free memory
+        clearData();
+
+        // Reload from .bin file
+        loadProcessedData(binPath.string());
+        } else {
+            std::cerr << "Failed to load OBJ file: " << filePath << std::endl;
+        }
+}
+
+std::unordered_map<std::string, std::shared_ptr<Model>> loadAllModels(const std::string& directoryPath)
+{
+    std::unordered_map<std::string, std::shared_ptr<Model>> models;
+    for (const auto& entry : std::filesystem::recursive_directory_iterator(directoryPath)) {
+        if (entry.path().extension() == ".obj") {
+            std::string objPath = entry.path().string();
+            std::filesystem::path binPath = entry.path();
+            binPath.replace_extension(".bin");
+            std::string modelName = entry.path().stem().string(); // Get the file name without extension
+
+            auto model = std::make_shared<Model>();
+            if (std::filesystem::exists(binPath)) {
+                model->loadProcessedData(binPath.string());
+            }
+
+            models[modelName] = model;
+
+            std::cout << "Processed model: " << modelName << std::endl;
+        }
     }
+    return models;
+}
+
+void Model::clearData() {
+    _vertexData.clear();
+    _vertexData.shrink_to_fit();
+    _texCoordData.clear();
+    _texCoordData.shrink_to_fit();
+    _normalData.clear();
+    _normalData.shrink_to_fit();
+    _indexData.clear();
+    _indexData.shrink_to_fit();
 }

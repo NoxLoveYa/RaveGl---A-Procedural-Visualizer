@@ -7,7 +7,7 @@
 
 #include "VertexArray.hpp"
 
-VertexArray::VertexArray()
+VertexArray::VertexArray() : _vao(0), _vbo(0)
 {
     glGenVertexArrays(1, &_vao);
     glGenBuffers(1, &_vbo);
@@ -47,41 +47,19 @@ void VertexArray::initializeObj(const std::vector<float>& vertices, const std::v
     glBindVertexArray(_vao);
 
     // Vertex positions
-    GLuint vertexVBO;
-    glGenBuffers(1, &vertexVBO);
-    glBindBuffer(GL_ARRAY_BUFFER, vertexVBO);
-    glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(float), vertices.data(), GL_STATIC_DRAW);
-    glEnableVertexAttribArray(0);
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
-    _vboBuffers.push_back(vertexVBO);
+    addBuffer(vertices, 0, 3);
 
     // Texture coordinates
     if (!texCoords.empty()) {
-        GLuint texCoordVBO;
-        glGenBuffers(1, &texCoordVBO);
-        glBindBuffer(GL_ARRAY_BUFFER, texCoordVBO);
-        glBufferData(GL_ARRAY_BUFFER, texCoords.size() * sizeof(float), texCoords.data(), GL_STATIC_DRAW);
-        glEnableVertexAttribArray(1);
-        glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(float), (void*)0);
-        _vboBuffers.push_back(texCoordVBO);
+        addBuffer(texCoords, 1, 2);
     }
 
     // Normals
     if (!normals.empty()) {
-        GLuint normalVBO;
-        glGenBuffers(1, &normalVBO);
-        glBindBuffer(GL_ARRAY_BUFFER, normalVBO);
-        glBufferData(GL_ARRAY_BUFFER, normals.size() * sizeof(float), normals.data(), GL_STATIC_DRAW);
-        glEnableVertexAttribArray(2);
-        glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
-        _vboBuffers.push_back(normalVBO);
+        addBuffer(normals, 2, 3);
     }
-
     // Indices (index buffer)
-    GLuint eboID;
-    glGenBuffers(1, &eboID);
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, eboID);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, indexData.size() * sizeof(int), indexData.data(), GL_STATIC_DRAW);
+    createElementBuffer(indexData);
 
     glBindVertexArray(0);
 }
@@ -121,6 +99,7 @@ void VertexArray::deleteBuffers()
         for (GLuint vbo : _vboBuffers) {
             glDeleteBuffers(1, &vbo);
         }
+        _vboBuffers.clear();
     }
 }
 
@@ -135,4 +114,12 @@ void VertexArray::addBuffer(const std::vector<float>& data, GLuint index, GLint 
     glEnableVertexAttribArray(index);
 
     _vboBuffers.push_back(vbo);
+}
+
+void VertexArray::createElementBuffer(const std::vector<int>& indexData)
+{
+    GLuint eboID;
+    glGenBuffers(1, &eboID);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, eboID);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, indexData.size() * sizeof(int), indexData.data(), GL_STATIC_DRAW);
 }

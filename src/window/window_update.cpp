@@ -6,43 +6,12 @@
 */
 
 #include "window.hpp"
+
 #include "cube.hpp"
 #include "primitive_generator.hpp"
 #include "random_primitive.hpp"
 #include "Model.hpp"
-
-std::unordered_map<std::string, std::shared_ptr<Model>> processAllModels(const std::string& directoryPath)
-{
-    std::unordered_map<std::string, std::shared_ptr<Model>> models;
-    for (const auto& entry : std::filesystem::recursive_directory_iterator(directoryPath)) {
-        if (entry.path().extension() == ".obj") {
-            std::string objPath = entry.path().string();
-            std::filesystem::path binPath = entry.path();
-            binPath.replace_extension(".bin");
-            std::string modelName = entry.path().stem().string(); // Get the file name without extension
-
-            auto model = std::make_shared<Model>();
-            if (std::filesystem::exists(binPath)) {
-                if (model->loadProcessedData(binPath.string())) {
-                    std::cout << "Loaded processed model: " << modelName << std::endl;
-                    std::cout << "Number of vertices: " << model->getNumVertices() << std::endl;
-                    std::cout << "Number of faces: " << model->getNumFaces() << std::endl;
-                } else {
-                    std::cerr << "Failed to load processed model: " << modelName << std::endl;
-                }
-            } else {
-                model->parseModel(objPath);
-                model->saveProcessedData(binPath.string());
-                std::cout << "Processed and saved model: " << modelName << std::endl;
-            }
-
-            models[modelName] = model;
-
-            std::cout << "Processed model: " << modelName << std::endl;
-        }
-    }
-    return models;
-}
+#include "ObjLoader.hpp"
 
 namespace visualizer
 {
@@ -81,21 +50,18 @@ namespace visualizer
         GLuint vertexShader = shaders->compileShaderFromFile("src/shaders/glsl/vertex_shader.glsl", GL_VERTEX_SHADER);
         GLuint fragmentShader = shaders->compileShaderFromFile("src/shaders/glsl/fragment_shader.glsl", GL_FRAGMENT_SHADER);
         //shaders->createProgram(vertexShader, fragmentShader, "cube");
-        //shaders.createProgram(vertexShader, fragmentShader, theShapes.getPrimitiveName().c_str());
-
+        shaders->createProgram(vertexShader, fragmentShader, theShapes.getPrimitiveName().c_str());
+        VertexArray randomVAO(vertices.data(), vertices.size());
+        randomVAO.bindAndUnbind();
         // spawn at will
 
-        GLuint torusVertexShader = shaders->compileShaderFromFile("src/shaders/glsl/torus_vertex_shader.glsl", GL_VERTEX_SHADER);
-        GLuint torusFragmentShader = shaders->compileShaderFromFile("src/shaders/glsl/torus_fragment_shader.glsl", GL_FRAGMENT_SHADER);
-        shaders->createProgram(vertexShader, fragmentShader, "generic_complex_obj");
-
-        std::unordered_map<std::string, std::shared_ptr<Model>> models = processAllModels("src/primitives/obj");
-        // for (auto& [modelName, model] : models) {
-        //     shaders->createProgram(vertexShader, fragmentShader, modelName.c_str());
-        //     std::cout << "Using model: " << modelName << std::endl;
-        //     std::cout << "gimme that !" << model->getNumVertices() << std::endl;
-        // }
-
+        GLuint vertexComplexShader = shaders->compileShaderFromFile("src/shaders/glsl/complex_vertex_shader.glsl", GL_VERTEX_SHADER);
+        GLuint fragmentComplexShader = shaders->compileShaderFromFile("src/shaders/glsl/complex_fragment_shader.glsl", GL_FRAGMENT_SHADER);
+        shaders->createProgram(vertexComplexShader, fragmentComplexShader, "generic_complex_obj");
+        //preprocessAllModels("src/primitives/obj");
+        ObjLoader objLoader;
+        objLoader.prepareObjModels("src/primitives/obj");
+        std::unordered_map<std::string, std::shared_ptr<Model>> models = loadAllModels("src/primitives/obj");
 
         //load object Model
         //Model complexTorus("src/primitives/obj/complex_torus.obj");
@@ -103,16 +69,17 @@ namespace visualizer
         // Light and material properties
         glm::vec3 lightPos(1.2f, 1.0f, 5.0f);
         glm::vec3 lightColor(1.0f, 1.0f, 1.0f);
-        glm::vec3 objectColor(1.0f, 1.0f, 1.0f); // Set object color to white
+        glm::vec3 objectColor(1.0f, 1.0f, 1.0f);
+        glm::mat4 projection = glm::perspective(glm::radians(45.0f), (float)width / (float)height, 0.1f, 100.0f);
+        //set object color to red
 
         while (!ShouldClose())
         {
+            glm::mat4 view = camera.GetViewMatrix();
             _deltaTime = CalculateDeltaTime();
             // Poll and handle events (inputs, window resize, etc.)
             PollEvents();
             ProcessInput(window, mouseState, camera);
-            // glm::mat4 projection = glm::perspective(glm::radians(45.0f), (float)width / (float)height, 0.1f, 100.0f);
-            // glm::mat4 view = camera.GetViewMatrix();
             // Start the Dear ImGui frame
             ImGui_ImplOpenGL3_NewFrame();
             ImGui_ImplGlfw_NewFrame();
@@ -130,11 +97,28 @@ namespace visualizer
             glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+            // Use the shader program
+            shaders->useProgram(theShapes.getPrimitiveName().c_str());
+            shaders->setMat4("projection", projection);
+            shaders->setMat4("view", view);
+
+            // Render random primitives
+            randomVAO.bind();
+            for (unsigned int i = 0; i < randomPositions.size(); i++) {
+                // Calculate the model matrix for each object and pass it to shader before drawing
+                glm::mat4 model = glm::mat4(1.0f);
+                model = glm::translate(model, randomPositions[i]);
+                float angle = glfwGetTime() * 50.0f; // Adjust the speed as needed
+                model = glm::rotate(model, glm::radians(angle), glm::vec3(1.0f, 0.3f, 0.5f));
+                shaders->setMat4("model", model);
+
+                glDrawArrays(GL_TRIANGLES, 0, numVertices);
+            }
+
             shaders->useProgram("generic_complex_obj");
+            
             for (auto& [modelName, model] : models) {
                 //Apply transformations and other operations to the model
-                glm::mat4 projection = glm::perspective(glm::radians(45.0f), (float)width / (float)height, 0.1f, 100.0f);
-                glm::mat4 view = camera.GetViewMatrix();
                 // Light and material properties
                 glm::vec3 lightPos(1.2f, 1.0f, 5.0f);
                 glm::vec3 lightColor(1.0f, 1.0f, 1.0f);
@@ -147,6 +131,14 @@ namespace visualizer
                 modelMatrix = glm::rotate(modelMatrix, glm::radians(angle), glm::vec3(1.0f, 0.3f, 0.5f));
 
                 // Set the shader uniforms
+                glm::vec3 gradientColorStart(0.0f, 0.0f, 1.0f); // Blue
+                glm::vec3 gradientColorEnd(1.0f, 0.0f, 0.0f); 
+
+                bool useGradient = false;
+                shaders->setVec3("gradientColorStart", gradientColorStart);
+                shaders->setVec3("gradientColorEnd", gradientColorEnd);
+                shaders->setBool("useGradient", useGradient);
+
                 shaders->setMat4("model", modelMatrix);
                 shaders->setMat4("view", view);
                 shaders->setMat4("projection", projection);
@@ -156,7 +148,6 @@ namespace visualizer
                 shaders->setVec3("objectColor", objectColor);
 
                 // Use the model matrix for rendering
-                model->setModelMatrix(modelMatrix);
                 model->draw();
             }
 
@@ -170,5 +161,6 @@ namespace visualizer
                 std::cerr << "OpenGL error: " << err << std::endl;
             }
         }
+        randomVAO.deleteBuffers(); // acts like the destructor
     }
 }
