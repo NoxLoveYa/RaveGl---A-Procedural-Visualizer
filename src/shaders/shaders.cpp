@@ -37,7 +37,7 @@ GLuint Shaders::compileShaderFromFile(const char *path, GLenum type)
     {
         glGetShaderInfoLog(shader, 512, NULL, infoLog);
         std::cerr << "ERROR::SHADER::COMPILATION_FAILED\n"
-                  << infoLog << std::endl;
+                  << infoLog << "from file: " << path << std::endl;
         return 0;
     }
     return shader;
@@ -71,6 +71,10 @@ bool Shaders::createProgram(GLuint vertexShader, GLuint fragmentShader, const ch
 
 void Shaders::useProgram(const char *id)
 {
+    if (programs.find(id) == programs.end()) {
+        std::cerr << "[" << id << "]" << "ERROR::SHADER::PROGRAM::ID_NOT_FOUND\n";
+        return;
+    }
     glUseProgram(programs[id]);
 }
 
