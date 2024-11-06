@@ -2,3 +2,5 @@ raveVisualizer
 *.o
 *.vscode
 *.ini
+*.bin
+todo
