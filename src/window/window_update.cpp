@@ -12,6 +12,8 @@
 #include "random_primitive.hpp"
 #include "Model.hpp"
 #include "ObjLoader.hpp"
+#include "Frustum.hpp"
+#include "../parser/ObjModel.hpp"
 
 namespace visualizer
 {
@@ -38,6 +40,7 @@ namespace visualizer
     void Window::update()
     {
         Camera camera(glm::vec3(0.0f, 0.0f, 3.0f));
+        std::shared_ptr<Frustum> frustum = std::make_shared<Frustum>();
         MouseState mouseState;
         int numVertices = 128;
         int numPositions = 10;
@@ -61,7 +64,7 @@ namespace visualizer
         //preprocessAllModels("src/primitives/obj");
         ObjLoader objLoader;
         objLoader.prepareObjModels("src/primitives/obj");
-        std::unordered_map<std::string, std::shared_ptr<Model>> models = loadAllModels("src/primitives/obj");
+        std::unordered_map<std::string, std::shared_ptr<ObjModel>> models = loadAllModels("src/primitives/obj");
 
         //load object Model
         //Model complexTorus("src/primitives/obj/complex_torus.obj");
@@ -71,7 +74,9 @@ namespace visualizer
         glm::vec3 lightColor(1.0f, 1.0f, 1.0f);
         glm::vec3 objectColor(1.0f, 1.0f, 1.0f);
         glm::mat4 projection = glm::perspective(glm::radians(45.0f), (float)width / (float)height, 0.1f, 100.0f);
+        // glm::mat4 view = camera.GetViewMatrix();
         //set object color to red
+
 
         while (!ShouldClose())
         {
@@ -94,6 +99,7 @@ namespace visualizer
                 End();
             }
 
+            frustum->update(projection, view);
             glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
@@ -105,27 +111,35 @@ namespace visualizer
             // Render random primitives
             randomVAO.bind();
             for (unsigned int i = 0; i < randomPositions.size(); i++) {
-                // Calculate the model matrix for each object and pass it to shader before drawing
-                glm::mat4 model = glm::mat4(1.0f);
-                model = glm::translate(model, randomPositions[i]);
-                float angle = glfwGetTime() * 50.0f; // Adjust the speed as needed
-                model = glm::rotate(model, glm::radians(angle), glm::vec3(1.0f, 0.3f, 0.5f));
-                shaders->setMat4("model", model);
+                if (frustum->isPointVisible(randomPositions[i])) {
+                    glm::mat4 model = glm::mat4(1.0f);
+                    model = glm::translate(model, randomPositions[i]);
+                    float angle = glfwGetTime() * 50.0f; // Adjust the speed as needed
+                    model = glm::rotate(model, glm::radians(angle), glm::vec3(1.0f, 0.3f, 0.5f));
+                    shaders->setMat4("model", model);
 
-                glDrawArrays(GL_TRIANGLES, 0, numVertices);
+                    glDrawArrays(GL_TRIANGLES, 0, numVertices);
+                }
             }
 
             shaders->useProgram("generic_complex_obj");
             
             for (auto& [modelName, model] : models) {
-                //Apply transformations and other operations to the model
+                if (model->isInFrustum(*frustum)) {
+
+                // glm::vec3 modelPosition = glm::vec3(
+                //     static_cast<float>(rand() % 10 - 5),
+                //     static_cast<float>(rand() % 10 - 5),
+                //     static_cast<float>(rand() % 10 - 5) 
+                // );
+                // model->setPosition(modelPosition);
                 // Light and material properties
                 glm::vec3 lightPos(1.2f, 1.0f, 5.0f);
                 glm::vec3 lightColor(1.0f, 1.0f, 1.0f);
 
                 // Example of applying transformations to the model
                 glm::mat4 modelMatrix = glm::mat4(1.0f);
-                modelMatrix = glm::translate(modelMatrix, glm::vec3(0.0f, 0.0f, -5.0f));
+                modelMatrix = glm::translate(modelMatrix, model->getPosition());
                 //continous rotation
                 float angle = glfwGetTime() * 50.0f; // Adjust the speed as needed
                 modelMatrix = glm::rotate(modelMatrix, glm::radians(angle), glm::vec3(1.0f, 0.3f, 0.5f));
@@ -149,6 +163,7 @@ namespace visualizer
 
                 // Use the model matrix for rendering
                 model->draw();
+                }
             }
 
             // Rendering ImGui

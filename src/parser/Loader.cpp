@@ -7,6 +7,7 @@
 
 #include "ObjLoader.hpp"
 #include <algorithm>
+#include "ObjModel.hpp"
 
 void ObjLoader::parseVertex(std::istringstream& iss, std::vector<Vertex>& vertices)
 {
@@ -124,7 +125,7 @@ void ObjLoader::load_process_save_Obj_Models(const std::string& objPath, const s
 
     if (loadOBJ(objPath, vertices, texCoords, normals, faces)) {
         std::cout << "Processing model: " << objPath << std::endl;
-        Model model;
+        ObjModel model;
         model.processData(vertices, texCoords, normals, faces, binPath);
 
         //Clear

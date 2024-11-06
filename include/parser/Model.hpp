@@ -21,24 +21,7 @@
 #include <string>
 #include <memory>
 #include "ObjStructs.hpp"
-
-// struct Vertex {
-//     float x, y, z;
-// };
-
-// struct TexCoord {
-//     float u, v, w;
-// };
-
-// struct Normal {
-//     float nx, ny, nz;
-// };
-
-// struct Face {
-//     std::vector<int> vertexIndices;
-//     std::vector<int> texCoordIndices;
-//     std::vector<int> normalIndices;
-// };
+#include "Frustum.hpp"
 
 //ensure that the tuple is hashed in a way that the order of the elements does not matter
 struct TupleHash {
@@ -50,48 +33,48 @@ struct TupleHash {
     }
 };
 
-class Model {
-    public:
-        // Constructor / Destructor
-        Model(const std::string& filePath);
-        Model();
-        ~Model();
-
-        // methods
-        void bind();
-        void unbind();
-        void draw();
-
-        // getters
-        size_t getNumVertices() { return _numFaces * 3; }
-        size_t getNumFaces() { return _numFaces; }
-        //std::vector<float> getVertexData() { return _vertexData; }
-        std::vector<float> getTexCoordData() { return _texCoordData; }
-        std::vector<float> getNormalData() { return _normalData; }
-        std::vector<int> getIndexData() { return _indexData; }
-        VertexArray getVao() { return _vao; }
-
-        // Processing data
-        void parseModel(const std::string& path);
-        void saveProcessedData(const std::string& filename);
-        bool loadProcessedData(const std::string& filename);
-        void clearData();
-
-        void processData(const std::vector<Vertex>& vertices, const std::vector<TexCoord>& texCoords, const std::vector<Normal>& normals, const std::vector<Face>& faces, const std::string &binPath);
-    private:
-        //ensure the vertex is unique (optimization)
-        int addUniqueVertex(const Vertex& vertex, const TexCoord& texCoord, const Normal& normal);
-        std::tuple<int, int, int> generateKey(int vertexIndex, int texCoordIndex, int normalIndex);
-
-
-        VertexArray _vao;
-
-        std::vector<float> _vertexData;
-        std::vector<float> _texCoordData;
-        std::vector<float> _normalData;
-        std::vector<int> _indexData; // Flattened indices
-        size_t _numFaces;
+struct BoundingBox {
+    glm::vec3 min;
+    glm::vec3 max;
 };
 
-//Process all data and add it to a Map
-std::unordered_map<std::string, std::shared_ptr<Model>> loadAllModels(const std::string& directoryPath);
+bool isBoundingBoxInFrustum(const Frustum& frustum, const BoundingBox& box);
+class Model {
+public:
+    // Constructor / Destructor
+    Model() : _numFaces(0), _position(0.0f) {}
+    virtual ~Model() {}
+
+    // Methods
+    virtual void bind() = 0;
+    virtual void unbind() = 0;
+    virtual void draw() = 0;
+
+    // Getters and setters
+    size_t getNumVertices() const { return _numFaces * 3; }
+    size_t getNumFaces() const { return _numFaces; }
+    glm::vec3 getPosition() const { return _position; }
+    void setPosition(const glm::vec3& position) { _position = position; }
+    BoundingBox getBoundingBox() const { return _boundingBox; }
+
+    // Processing data
+    virtual void parseModel(const std::string& path) = 0;
+    virtual void saveProcessedData(const std::string& filename) = 0;
+    virtual bool loadProcessedData(const std::string& filename) = 0;
+    virtual void clearData() = 0;
+    virtual void unloadModel() = 0;
+
+    //Frustum culling
+    bool isInFrustum(const Frustum& frustum) const;
+
+protected:
+    VertexArray _vao;
+    std::vector<float> _vertexData;
+    std::vector<float> _texCoordData;
+    std::vector<float> _normalData;
+    std::vector<int> _indexData;
+    size_t _numFaces;
+    BoundingBox _boundingBox;
+
+    glm::vec3 _position;
+};
