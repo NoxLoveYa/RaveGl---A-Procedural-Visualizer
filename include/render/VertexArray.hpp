@@ -21,16 +21,14 @@
 #include <iterator>
 #include <memory>
 
-
 struct VertexData {
-    float x, y, z; // Vertex coordinates
+    float x, y, z;    // Vertex coordinates
     float u, v, w;    // Texture coordinates
     float nx, ny, nz; // Normal coordinates
 
     bool operator==(const VertexData& other) const {
-        return x == other.x && y == other.y && z == other.z &&
-               u == other.u && v == other.v && w == other.w &&
-               nx == other.nx && ny == other.ny && nz == other.nz;
+        return x == other.x && y == other.y && z == other.z && u == other.u && v == other.v &&
+               w == other.w && nx == other.nx && ny == other.ny && nz == other.nz;
     }
 };
 
@@ -42,32 +40,33 @@ struct VertexDataHash {
     }
 };
 
-class VertexArray
-{
-    public:
-        // Constructor / Destructor
-        VertexArray(const std::vector<float>& vertices);
-        VertexArray(const float* vertices, size_t size);
-        VertexArray();
-        ~VertexArray();
+class VertexArray {
+  public:
+    // Constructor / Destructor
+    VertexArray(const std::vector<float>& vertices);
+    VertexArray(const float* vertices, size_t size);
+    VertexArray();
+    ~VertexArray();
 
-        // methods
-        void bindAndUnbind(); // call this when you want to initialize the buffers (VAO/VBO) 
-        void bind();
-        void unbind();
-        void deleteBuffers();
+    // methods
+    void bindAndUnbind(); // call this when you want to initialize the buffers (VAO/VBO)
+    void bind();
+    void unbind();
+    void deleteBuffers();
 
-        // getters
-        GLuint getVao() const { return _vao; }
-        GLuint getVbo() const { return _vbo; }
+    // getters
+    GLuint getVao() const { return _vao; }
+    GLuint getVbo() const { return _vbo; }
 
-        void addBuffer(const std::vector<float>& data, GLuint index, GLint size);
-        void createElementBuffer(const std::vector<int>& indexData);
-        void initializeObj(const std::vector<float>& vertices, const std::vector<float>& texCoords, const std::vector<float>& normals, const std::vector<int>& indexData);
-    private:
-        void initialize(const float* vertices, size_t size);
+    void addBuffer(const std::vector<float>& data, GLuint index, GLint size);
+    void createElementBuffer(const std::vector<int>& indexData);
+    void initializeObj(const std::vector<float>& vertices, const std::vector<float>& texCoords,
+                       const std::vector<float>& normals, const std::vector<int>& indexData);
 
-        GLuint _vao;
-        GLuint _vbo;
-        std::vector<GLuint> _vboBuffers; // Store all the VBOs
+  private:
+    void initialize(const float* vertices, size_t size);
+
+    GLuint              _vao;
+    GLuint              _vbo;
+    std::vector<GLuint> _vboBuffers; // Store all the VBOs
 };

@@ -9,7 +9,7 @@
 
 #include "VertexArray.hpp"
 #include <glad/glad.h>
-//include glm
+// include glm
 #include <glm/glm.hpp>
 #include <iostream>
 #include <fstream>
@@ -23,7 +23,7 @@
 #include "ObjStructs.hpp"
 #include "Frustum.hpp"
 
-//ensure that the tuple is hashed in a way that the order of the elements does not matter
+// ensure that the tuple is hashed in a way that the order of the elements does not matter
 struct TupleHash {
     std::size_t operator()(const std::tuple<int, int, int>& t) const {
         auto hash1 = std::hash<int>{}(std::get<0>(t));
@@ -40,41 +40,44 @@ struct BoundingBox {
 
 bool isBoundingBoxInFrustum(const Frustum& frustum, const BoundingBox& box);
 class Model {
-public:
+  public:
     // Constructor / Destructor
     Model() : _numFaces(0), _position(0.0f) {}
     virtual ~Model() {}
 
     // Methods
-    virtual void bind() = 0;
+    virtual void bind()   = 0;
     virtual void unbind() = 0;
-    virtual void draw() = 0;
+    virtual void draw()   = 0;
 
     // Getters and setters
-    size_t getNumVertices() const { return _numFaces * 3; }
-    size_t getNumFaces() const { return _numFaces; }
-    glm::vec3 getPosition() const { return _position; }
-    void setPosition(const glm::vec3& position) { _position = position; }
+    size_t      getNumVertices() const { return _numFaces * 3; }
+    size_t      getNumFaces() const { return _numFaces; }
+    glm::vec3   getPosition() const { return _position; }
+    void        setPosition(const glm::vec3& position) { _position = position; }
     BoundingBox getBoundingBox() const { return _boundingBox; }
+    bool        getIsModelShown() const { return _isModelShown; }
+    void        setModelShown(bool shown) { _isModelShown = shown; }
 
     // Processing data
-    virtual void parseModel(const std::string& path) = 0;
+    virtual void parseModel(const std::string& path)            = 0;
     virtual void saveProcessedData(const std::string& filename) = 0;
     virtual bool loadProcessedData(const std::string& filename) = 0;
-    virtual void clearData() = 0;
-    virtual void unloadModel() = 0;
+    virtual void clearData()                                    = 0;
+    virtual void unloadModel()                                  = 0;
 
-    //Frustum culling
-    bool isInFrustum(const Frustum& frustum) const;
+    // Frustum culling
+    bool isInFrustum(const Frustum& frustum);
 
-protected:
-    VertexArray _vao;
+  protected:
+    VertexArray        _vao;
     std::vector<float> _vertexData;
     std::vector<float> _texCoordData;
     std::vector<float> _normalData;
-    std::vector<int> _indexData;
-    size_t _numFaces;
-    BoundingBox _boundingBox;
+    std::vector<int>   _indexData;
+    size_t             _numFaces;
+    BoundingBox        _boundingBox;
 
     glm::vec3 _position;
+    bool      _isModelShown;
 };

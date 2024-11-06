@@ -18,45 +18,42 @@
 #include "camera.hpp"
 #include "VertexArray.hpp"
 
-namespace visualizer
-{
-    class Window
-    {
-    public:
-        // Constructor / Destructor
-        Window(int width, int height, const char *title);
-        ~Window();
-        // Operator
-        operator GLFWwindow *() { return window; }
-        // Getter
-        GLFWwindow *GetWindow() { return window; }
-        // Method
-        bool ShouldClose() { return glfwWindowShouldClose(window); }
-        void SwapBuffers() { glfwSwapBuffers(window); }
-        void PollEvents() { glfwPollEvents(); }
+namespace visualizer {
+class Window {
+  public:
+    // Constructor / Destructor
+    Window(int width, int height, const char* title);
+    ~Window();
+    // Operator
+    operator GLFWwindow*() { return window; }
+    // Getter
+    GLFWwindow* GetWindow() { return window; }
+    // Method
+    bool ShouldClose() { return glfwWindowShouldClose(window); }
+    void SwapBuffers() { glfwSwapBuffers(window); }
+    void PollEvents() { glfwPollEvents(); }
 
-        void ProcessInput(GLFWwindow *window, MouseState &mouseState, Camera &camera);
-        void update();
-        // Callback
-        static void framebuffer_size_callback(GLFWwindow *window, int width, int height)
-        {
-            (void)window;
-            glViewport(0, 0, width, height);
-        }
-        //deltaTime
-        float CalculateDeltaTime() {
-            float currentFrame = static_cast<float>(glfwGetTime());
-            _deltaTime = currentFrame - _lastFrame;
-            _lastFrame = currentFrame;
-            return _deltaTime;
-        }
-        float GetDeltaTime() { return _deltaTime; }
+    void ProcessInput(GLFWwindow* window, MouseState& mouseState, Camera& camera);
+    void update();
+    // Callback
+    static void framebuffer_size_callback(GLFWwindow* window, int width, int height) {
+        (void)window;
+        glViewport(0, 0, width, height);
+    }
+    // deltaTime
+    float CalculateDeltaTime() {
+        float currentFrame = static_cast<float>(glfwGetTime());
+        _deltaTime         = currentFrame - _lastFrame;
+        _lastFrame         = currentFrame;
+        return _deltaTime;
+    }
+    float GetDeltaTime() { return _deltaTime; }
 
-    private:
-        GLFWwindow *window;
-        ImGuiIO *io;
-        int width, height;
-        float _deltaTime = 0.0f;
-        float _lastFrame = 0.0f;
-    };
-}
+  private:
+    GLFWwindow* window;
+    ImGuiIO*    io;
+    int         width, height;
+    float       _deltaTime = 0.0f;
+    float       _lastFrame = 0.0f;
+};
+} // namespace visualizer

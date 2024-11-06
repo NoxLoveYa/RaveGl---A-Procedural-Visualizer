@@ -10,19 +10,18 @@
 #include <ObjLoader.hpp>
 
 ObjModel::ObjModel(const std::string& filePath) {
-    std::vector<Vertex> vertices;
+    std::vector<Vertex>   vertices;
     std::vector<TexCoord> texCoords;
-    std::vector<Normal> normals;
-    std::vector<Face> faces;
+    std::vector<Normal>   normals;
+    std::vector<Face>     faces;
 
     ObjLoader loader;
     if (loader.loadOBJ(filePath, vertices, texCoords, normals, faces)) {
         std::cout << "Vertices: " << vertices.size()
-        << " | Texture Coordinates: " << texCoords.size()
-        << " | Normals: " << normals.size()
-        << " | Faces: " << faces.size() << std::endl;
+                  << " | Texture Coordinates: " << texCoords.size()
+                  << " | Normals: " << normals.size() << " | Faces: " << faces.size() << std::endl;
         std::cout << "Processing data..." << std::endl;
-        //processData(vertices, texCoords, normals, faces);
+        // processData(vertices, texCoords, normals, faces);
         _vao.initializeObj(_vertexData, _texCoordData, _normalData, _indexData);
         _numFaces = faces.size();
         _position = glm::vec3(0.0f, 0.0f, 0.0f);
@@ -36,24 +35,18 @@ ObjModel::ObjModel(const std::string& filePath) {
             max.y = std::max(max.y, vertex.y);
             max.z = std::max(max.z, vertex.z);
         }
-        _boundingBox = { min, max };
+        _boundingBox = {min, max};
     } else {
         std::cerr << "Failed to load OBJ file: " << filePath << std::endl;
     }
     // parseModel(filePath);
 }
 
-ObjModel::~ObjModel() {
-    unloadModel();
-}
+ObjModel::~ObjModel() { unloadModel(); }
 
-void ObjModel::bind() {
-    _vao.bind();
-}
+void ObjModel::bind() { _vao.bind(); }
 
-void ObjModel::unbind() {
-    _vao.unbind();
-}
+void ObjModel::unbind() { _vao.unbind(); }
 
 void ObjModel::draw() {
     _vao.bind();
@@ -61,13 +54,13 @@ void ObjModel::draw() {
     _vao.unbind();
 }
 
-std::tuple<int, int, int> ObjModel::generateKey(int vertexIndex, int texCoordIndex, int normalIndex)
-{
+std::tuple<int, int, int> ObjModel::generateKey(int vertexIndex, int texCoordIndex,
+                                                int normalIndex) {
     return std::make_tuple(vertexIndex, texCoordIndex, normalIndex);
 }
 
-int ObjModel::addUniqueVertex(const Vertex& vertex, const TexCoord& texCoord, const Normal& normal)
-{
+int ObjModel::addUniqueVertex(const Vertex& vertex, const TexCoord& texCoord,
+                              const Normal& normal) {
     int index = _vertexData.size() / 3;
 
     _vertexData.push_back(vertex.x);
@@ -84,35 +77,37 @@ int ObjModel::addUniqueVertex(const Vertex& vertex, const TexCoord& texCoord, co
     return index;
 }
 
-void ObjModel::processData(const std::vector<Vertex>& vertices, const std::vector<TexCoord>& texCoords, const std::vector<Normal>& normals, const std::vector<Face>& faces, const std::string &binPath)
-{
+void ObjModel::processData(const std::vector<Vertex>&   vertices,
+                           const std::vector<TexCoord>& texCoords,
+                           const std::vector<Normal>& normals, const std::vector<Face>& faces,
+                           const std::string& binPath) {
     std::unordered_map<std::tuple<int, int, int>, int, TupleHash> uniqueVertexMap;
 
     for (const auto& face : faces) {
         for (int i = 0; i < 3; ++i) {
-            int vertexIndex = face.vertexIndices[i];
+            int vertexIndex   = face.vertexIndices[i];
             int texCoordIndex = face.texCoordIndices[i];
-            int normalIndex = face.normalIndices[i];
+            int normalIndex   = face.normalIndices[i];
 
             auto key = generateKey(vertexIndex, texCoordIndex, normalIndex);
 
             if (uniqueVertexMap.find(key) == uniqueVertexMap.end()) {
-                const Vertex& vertex = vertices[vertexIndex];
+                const Vertex&   vertex   = vertices[vertexIndex];
                 const TexCoord& texCoord = texCoords[texCoordIndex];
-                const Normal& normal = normals[normalIndex];
-                int newIndex = addUniqueVertex(vertex, texCoord, normal);
-                uniqueVertexMap[key] = newIndex;
+                const Normal&   normal   = normals[normalIndex];
+                int             newIndex = addUniqueVertex(vertex, texCoord, normal);
+                uniqueVertexMap[key]     = newIndex;
             }
 
             _indexData.push_back(uniqueVertexMap[key]);
         }
-    }    
+    }
 
-    std::cout
-    << " Vertices: " << _vertexData.size() / 3
-    << " | texCoords: " << _texCoordData.size() / 2
-    << " | normals: " << _normalData.size() / 3 << std::endl;
-    std::cout << "Vertices: " << _vertexData.size() / 3 << " | Indices: " << _indexData.size() << std::endl;
+    std::cout << " Vertices: " << _vertexData.size() / 3
+              << " | texCoords: " << _texCoordData.size() / 2
+              << " | normals: " << _normalData.size() / 3 << std::endl;
+    std::cout << "Vertices: " << _vertexData.size() / 3 << " | Indices: " << _indexData.size()
+              << std::endl;
     saveProcessedData(binPath);
     clearData(); // Clear the data after processing
     uniqueVertexMap.clear();
@@ -123,17 +118,16 @@ void ObjModel::processData(const std::vector<Vertex>& vertices, const std::vecto
 
 void ObjModel::parseModel(const std::string& path) {
     // Implementation of model parsing
-    std::vector<Vertex> vertices;
+    std::vector<Vertex>   vertices;
     std::vector<TexCoord> texCoords;
-    std::vector<Normal> normals;
-    std::vector<Face> faces;
+    std::vector<Normal>   normals;
+    std::vector<Face>     faces;
 
     ObjLoader loader;
     if (loader.loadOBJ(path, vertices, texCoords, normals, faces)) {
         std::cout << "Vertices: " << vertices.size()
-        << " | Texture Coordinates: " << texCoords.size()
-        << " | Normals: " << normals.size()
-        << " | Faces: " << faces.size() << std::endl;
+                  << " | Texture Coordinates: " << texCoords.size()
+                  << " | Normals: " << normals.size() << " | Faces: " << faces.size() << std::endl;
         std::cout << "Processing data..." << std::endl;
         std::filesystem::path binPath = path;
         binPath.replace_extension(".bin");
@@ -159,9 +153,9 @@ void ObjModel::parseModel(const std::string& path) {
 
         // Reload from .bin file
         loadProcessedData(binPath.string());
-        } else {
-            std::cerr << "Failed to load OBJ file: " << path << std::endl;
-        }
+    } else {
+        std::cerr << "Failed to load OBJ file: " << path << std::endl;
+    }
 }
 
 void ObjModel::saveProcessedData(const std::string& filename) {
@@ -172,11 +166,11 @@ void ObjModel::saveProcessedData(const std::string& filename) {
         return;
     }
 
-    size_t vertexDataSize = _vertexData.size();
+    size_t vertexDataSize   = _vertexData.size();
     size_t texCoordDataSize = _texCoordData.size();
-    size_t normalDataSize = _normalData.size();
-    size_t indexDataSize = _indexData.size();
-    size_t numFaces = _numFaces;
+    size_t normalDataSize   = _normalData.size();
+    size_t indexDataSize    = _indexData.size();
+    size_t numFaces         = _numFaces;
 
     // Write sizes
     outFile.write(reinterpret_cast<const char*>(&vertexDataSize), sizeof(vertexDataSize));
@@ -186,10 +180,14 @@ void ObjModel::saveProcessedData(const std::string& filename) {
     outFile.write(reinterpret_cast<const char*>(&numFaces), sizeof(numFaces));
 
     // Write data
-    outFile.write(reinterpret_cast<const char*>(_vertexData.data()), vertexDataSize * sizeof(float));
-    outFile.write(reinterpret_cast<const char*>(_texCoordData.data()), texCoordDataSize * sizeof(float));
-    outFile.write(reinterpret_cast<const char*>(_normalData.data()), normalDataSize * sizeof(float));
-    outFile.write(reinterpret_cast<const char*>(_indexData.data()), indexDataSize * sizeof(unsigned int));
+    outFile.write(reinterpret_cast<const char*>(_vertexData.data()),
+                  vertexDataSize * sizeof(float));
+    outFile.write(reinterpret_cast<const char*>(_texCoordData.data()),
+                  texCoordDataSize * sizeof(float));
+    outFile.write(reinterpret_cast<const char*>(_normalData.data()),
+                  normalDataSize * sizeof(float));
+    outFile.write(reinterpret_cast<const char*>(_indexData.data()),
+                  indexDataSize * sizeof(unsigned int));
 
     clearData(); // Clear the data after saving
     std::cout << "Model data saved successfully to " << filename << std::endl;
@@ -257,14 +255,16 @@ void ObjModel::unloadModel() {
     _vao.deleteBuffers();
 }
 
-std::unordered_map<std::string, std::shared_ptr<ObjModel>> loadAllModels(const std::string& directoryPath) {
+std::unordered_map<std::string, std::shared_ptr<ObjModel>>
+loadAllModels(const std::string& directoryPath) {
     std::unordered_map<std::string, std::shared_ptr<ObjModel>> models;
     for (const auto& entry : std::filesystem::recursive_directory_iterator(directoryPath)) {
         if (entry.path().extension() == ".obj") {
-            std::string objPath = entry.path().string();
+            std::string           objPath = entry.path().string();
             std::filesystem::path binPath = entry.path();
             binPath.replace_extension(".bin");
-            std::string modelName = entry.path().stem().string(); // Get the file name without extension
+            std::string modelName =
+                entry.path().stem().string(); // Get the file name without extension
 
             auto model = std::make_shared<ObjModel>(objPath);
             if (std::filesystem::exists(binPath)) {

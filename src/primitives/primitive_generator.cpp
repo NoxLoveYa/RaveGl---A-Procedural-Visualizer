@@ -7,39 +7,33 @@
 
 #include "primitive_generator.hpp"
 
-const char *military_alphabet[] = {
-    "Alpha", "Bravo", "Charlie", "Delta", "Echo", "Foxtrot", "Golf",
-    "Hotel", "India", "Juliett", "Kilo", "Lima", "Mike", "November",
-    "Oscar", "Papa", "Quebec", "Romeo", "Sierra", "Tango", "Uniform",
-    "Victor", "Whiskey", "Xray", "Yankee", "Zulu"
-};
+const char* military_alphabet[] = {
+    "Alpha",   "Bravo", "Charlie", "Delta",  "Echo",     "Foxtrot", "Golf",   "Hotel",  "India",
+    "Juliett", "Kilo",  "Lima",    "Mike",   "November", "Oscar",   "Papa",   "Quebec", "Romeo",
+    "Sierra",  "Tango", "Uniform", "Victor", "Whiskey",  "Xray",    "Yankee", "Zulu"};
 
-std::string generateRandomName()
-{
-    int index = rand() % 26;
+std::string generateRandomName() {
+    int         index        = rand() % 26;
     std::string primary_name = military_alphabet[index];
-    int number = rand() % 10000;
+    int         number       = rand() % 10000;
 
     return primary_name + "_" + std::to_string(number);
 }
 
 // use the primitive_name, if not provided generate a random uuid
-void PrimitiveGenerator::setPrimitiveName(const std::string& primitive_name)
-{
+void PrimitiveGenerator::setPrimitiveName(const std::string& primitive_name) {
     _primitive_name = primitive_name;
     if (_primitive_name.empty()) {
         _primitive_name = generateRandomName();
     }
 }
 
-PrimitiveGenerator::~PrimitiveGenerator()
-{
-}
+PrimitiveGenerator::~PrimitiveGenerator() {}
 
-PrimitiveGenerator::PrimitiveGenerator(const std::string& primitive_name, int numVertices, int numPositions, const std::string &filename)
-{
+PrimitiveGenerator::PrimitiveGenerator(const std::string& primitive_name, int numVertices,
+                                       int numPositions, const std::string& filename) {
     setPrimitiveName(primitive_name);
-    _vertices = generateRandomVertices(numVertices);
+    _vertices  = generateRandomVertices(numVertices);
     _positions = generateRandomPositions(numPositions);
 
     clearFile(filename);
@@ -52,8 +46,7 @@ float PrimitiveGenerator::randomFloat(float min, float max) {
 }
 
 // Function to generate random vertices
-std::vector<float> PrimitiveGenerator::generateRandomVertices(int numVertices)
-{
+std::vector<float> PrimitiveGenerator::generateRandomVertices(int numVertices) {
     std::vector<float> vertices;
     for (int i = 0; i < numVertices; ++i) {
         float x = randomFloat(-1.0f, 1.0f);
@@ -70,8 +63,7 @@ std::vector<float> PrimitiveGenerator::generateRandomVertices(int numVertices)
     return vertices;
 }
 
-std::vector<glm::vec3> PrimitiveGenerator::generateRandomPositions(int numPositions)
-{
+std::vector<glm::vec3> PrimitiveGenerator::generateRandomPositions(int numPositions) {
     std::vector<glm::vec3> positions;
     for (int i = 0; i < numPositions; ++i) {
         float x = randomFloat(-10.0f, 10.0f);
@@ -82,8 +74,8 @@ std::vector<glm::vec3> PrimitiveGenerator::generateRandomPositions(int numPositi
     return positions;
 }
 
-void PrimitiveGenerator::appendVerticesToFile(const std::vector<float>& vertices, const std::string& filename)
-{
+void PrimitiveGenerator::appendVerticesToFile(const std::vector<float>& vertices,
+                                              const std::string&        filename) {
     std::ofstream file;
     file.open(filename, std::ios::app);
 
@@ -99,15 +91,16 @@ void PrimitiveGenerator::appendVerticesToFile(const std::vector<float>& vertices
     file << "    // x, y, z, u, v" << std::endl;
     file << "    // Positions        // Texture Coords " << std::endl;
     for (size_t i = 0; i < vertices.size(); i += 5) {
-        file << "    " << vertices[i] << "f, " << vertices[i + 1] << "f, " << vertices[i + 2] << "f,  " << vertices[i + 3] << "f, " << vertices[i + 4] << "f," << std::endl;
+        file << "    " << vertices[i] << "f, " << vertices[i + 1] << "f, " << vertices[i + 2]
+             << "f,  " << vertices[i + 3] << "f, " << vertices[i + 4] << "f," << std::endl;
     }
     file << "};" << std::endl;
 
     file.close();
 }
 
-void PrimitiveGenerator::appendPositionsToFile(const std::vector<glm::vec3>& positions, const std::string& filename)
-{
+void PrimitiveGenerator::appendPositionsToFile(const std::vector<glm::vec3>& positions,
+                                               const std::string&            filename) {
     std::ofstream file;
     file.open(filename, std::ios::app); // Open file in append mode
 
@@ -126,8 +119,7 @@ void PrimitiveGenerator::appendPositionsToFile(const std::vector<glm::vec3>& pos
     file.close();
 }
 
-void PrimitiveGenerator::clearFile(const std::string& filename)
-{
+void PrimitiveGenerator::clearFile(const std::string& filename) {
     std::ofstream file;
     file.open(filename, std::ofstream::out | std::ofstream::trunc); // Open file in truncate mode
 
@@ -140,11 +132,11 @@ void PrimitiveGenerator::clearFile(const std::string& filename)
 }
 
 // Debug
-void PrimitiveGenerator::printVertices(const std::vector<float>& vertices)
-{
+void PrimitiveGenerator::printVertices(const std::vector<float>& vertices) {
     std::cout << "float random_vertices[] = {" << std::endl;
     for (size_t i = 0; i < vertices.size(); i += 5) {
-        std::cout << "    " << vertices[i] << "f, " << vertices[i + 1] << "f, " << vertices[i + 2] << "f,  " << vertices[i + 3] << "f, " << vertices[i + 4] << "f," << std::endl;
+        std::cout << "    " << vertices[i] << "f, " << vertices[i + 1] << "f, " << vertices[i + 2]
+                  << "f,  " << vertices[i + 3] << "f, " << vertices[i + 4] << "f," << std::endl;
     }
     std::cout << "};" << std::endl;
 }
@@ -152,24 +144,16 @@ void PrimitiveGenerator::printVertices(const std::vector<float>& vertices)
 void PrimitiveGenerator::printPositions(const std::vector<glm::vec3>& positions) {
     std::cout << "glm::vec3 random_positions[] = {" << std::endl;
     for (const auto& pos : positions) {
-        std::cout << "    glm::vec3(" << pos.x << "f, " << pos.y << "f, " << pos.z << "f)," << std::endl;
+        std::cout << "    glm::vec3(" << pos.x << "f, " << pos.y << "f, " << pos.z << "f),"
+                  << std::endl;
     }
     std::cout << "};" << std::endl;
 }
 
-//getters
+// getters
 
-std::vector<float> PrimitiveGenerator::getVertices() const
-{
-    return _vertices;
-}
+std::vector<float> PrimitiveGenerator::getVertices() const { return _vertices; }
 
-std::vector<glm::vec3> PrimitiveGenerator::getPositions() const
-{
-    return _positions;
-}
+std::vector<glm::vec3> PrimitiveGenerator::getPositions() const { return _positions; }
 
-std::string PrimitiveGenerator::getPrimitiveName() const
-{
-    return _primitive_name;
-}
+std::string PrimitiveGenerator::getPrimitiveName() const { return _primitive_name; }

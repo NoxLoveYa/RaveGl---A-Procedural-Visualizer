@@ -3,11 +3,10 @@
 
 #include "Model.hpp"
 
-//Interface for loaders if needed.
+// Interface for loaders if needed.
 class ILoader {
-    public:
-
-    private:
+  public:
+  private:
 };
 
 #endif // LOADER_H

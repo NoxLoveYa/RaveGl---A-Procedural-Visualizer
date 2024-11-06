@@ -7,8 +7,7 @@
 
 #include "window/window.hpp"
 
-int main(void)
-{
+int main(void) {
     visualizer::Window window(640, 480, "RaveGl - A Procedural Visualizer");
 
     window.update();
