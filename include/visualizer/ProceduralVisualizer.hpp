@@ -50,4 +50,10 @@ class ProceduralVisualizer {
     int                                                        numVertices;
     int                                                        numPositions;
     Camera&                                                    camera;
+    GLuint                                                     quadVAO;
+    GLuint                                                     quadVBO;
+    glm::vec2                                                  fractalOffset;
+    float                                                      fractalZoom;
+    int                                                        maxIterations;
+    float                                                      time;
 };
