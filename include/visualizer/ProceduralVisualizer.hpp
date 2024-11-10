@@ -8,6 +8,7 @@
 #pragma once
 
 #include <memory>
+#include <random>
 #include <vector>
 #include <unordered_map>
 #include <glm/glm.hpp>
@@ -16,15 +17,14 @@
 #include "Frustum.hpp"
 #include "VertexArray.hpp"
 #include "camera.hpp"
-#include <shaders.hpp>
-#include <camera.hpp>
-#include <ObjModel.hpp>
-#include <primitive_generator.hpp>
-#include <camera.hpp>
+#include "shaders.hpp"
+#include "ObjModel.hpp"
+#include "primitive_generator.hpp"
+#include "camera.hpp"
 
 class ProceduralVisualizer {
   public:
-    ProceduralVisualizer(int width, int height, Camera& camera);
+    ProceduralVisualizer(int width, int height, Camera& camera, GLFWwindow& window);
     ~ProceduralVisualizer();
 
     void initialize();
@@ -50,6 +50,7 @@ class ProceduralVisualizer {
     int                                                        numVertices;
     int                                                        numPositions;
     Camera&                                                    camera;
+    GLFWwindow&                                                window;
     GLuint                                                     quadVAO;
     GLuint                                                     quadVBO;
     glm::vec2                                                  fractalOffset;

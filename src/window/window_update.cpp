@@ -39,7 +39,7 @@ void Window::ProcessInput(GLFWwindow* window, MouseState& mouseState, Camera& ca
 void Window::update() {
     MouseState           mouseState;
     Camera               camera(glm::vec3(0.0f, 0.0f, 3.0f));
-    ProceduralVisualizer visualizer(width, height, camera);
+    ProceduralVisualizer visualizer(width, height, camera, *window);
     visualizer.initialize();
 
     while (!ShouldClose()) {

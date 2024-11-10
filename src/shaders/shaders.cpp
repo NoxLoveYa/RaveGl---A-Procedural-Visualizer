@@ -57,6 +57,7 @@ bool Shaders::createProgram(GLuint vertexShader, GLuint fragmentShader, const ch
     glDeleteShader(fragmentShader);
 
     programs[id] = program;
+    std::cout << "Shader program created and stored with ID: " << id << std::endl;
     return true;
 }
 
