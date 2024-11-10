@@ -39,6 +39,7 @@ struct BoundingBox {
 };
 
 bool isBoundingBoxInFrustum(const Frustum& frustum, const BoundingBox& box);
+
 class Model {
   public:
     // Constructor / Destructor
@@ -58,6 +59,8 @@ class Model {
     BoundingBox getBoundingBox() const { return _boundingBox; }
     bool        getIsModelShown() const { return _isModelShown; }
     void        setModelShown(bool shown) { _isModelShown = shown; }
+    glm::mat4   getModelMatrix() const { return _modelMatrix; }
+    void        setModelMatrix(const glm::mat4& matrix) { _modelMatrix = matrix; }
 
     // Processing data
     virtual void parseModel(const std::string& path)            = 0;
@@ -80,4 +83,8 @@ class Model {
 
     glm::vec3 _position;
     bool      _isModelShown;
+    glm::mat4 _modelMatrix;
 };
+
+// std::unordered_map<std::string, std::shared_ptr<Model>>
+// loadAllModels(const std::string& directoryPath);
